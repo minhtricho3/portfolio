@@ -27,8 +27,10 @@ body {
   align-items: center;
   justify-content: center;
   background-color: #080810;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   position: relative;
+  padding: 24px 16px;
 }
 
 /* ===== VIDEO BACKGROUND ===== */
