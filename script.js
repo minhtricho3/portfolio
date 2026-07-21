@@ -291,72 +291,68 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-const trails = [];
-const TRAIL_COUNT = 35;     // số sợi
-const TRAIL_LEN   = 22;     // độ dài lịch sử mỗi sợi
-const SPEED       = 0.12;   // tốc độ đuổi theo chuột (0~1)
-
-// Khởi tạo các sợi với offset lệch nhau
-for (let i = 0; i < TRAIL_COUNT; i++) {
-  trails.push({
-    x: window.innerWidth  / 2,
-    y: window.innerHeight / 2,
-    history: [],
-    delay: i * 1.8,        // sợi sau trễ hơn sợi trước
-    angle: (i / TRAIL_COUNT) * Math.PI * 2
-  });
-}
+const TRAIL_COUNT = 30;
+const TRAIL_LEN   = 20;
 
 let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-
 window.addEventListener('mousemove', (e) => {
   mouse.x = e.clientX;
   mouse.y = e.clientY;
 });
 
-// Vị trí trung gian cho từng sợi (mỗi sợi đuổi theo sợi trước)
-const positions = Array.from({ length: TRAIL_COUNT }, () => ({
-  x: mouse.x, y: mouse.y
+// Mỗi sợi có tốc độ + offset riêng để đi từ nhiều hướng
+const trails = Array.from({ length: TRAIL_COUNT }, (_, i) => ({
+  x:       window.innerWidth  / 2,
+  y:       window.innerHeight / 2,
+  history: [],
+  speed:   0.15 + Math.random() * 0.35,         // tốc độ khác nhau
+  ox:      (Math.random() - 0.5) * 28,           // lệch ngang ngẫu nhiên
+  oy:      (Math.random() - 0.5) * 28,           // lệch dọc ngẫu nhiên
+  wobble:  (Math.random() - 0.5) * 0.08,        // rung nhẹ
+  phase:   Math.random() * Math.PI * 2
 }));
+
+let tick = 0;
 
 function animateTrail() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  tick += 0.04;
 
-  // Cập nhật vị trí từng sợi theo chain
   for (let i = 0; i < TRAIL_COUNT; i++) {
-    const target = i === 0 ? mouse : positions[i - 1];
-    positions[i].x += (target.x - positions[i].x) * (SPEED - i * 0.001);
-    positions[i].y += (target.y - positions[i].y) * (SPEED - i * 0.001);
-
     const t = trails[i];
-    t.history.push({ x: positions[i].x, y: positions[i].y });
+
+    // Mục tiêu = chuột + offset riêng của sợi + dao động sin
+    const tx = mouse.x + t.ox + Math.sin(tick + t.phase) * 10;
+    const ty = mouse.y + t.oy + Math.cos(tick + t.phase * 1.3) * 10;
+
+    t.x += (tx - t.x) * t.speed;
+    t.y += (ty - t.y) * t.speed;
+
+    t.history.push({ x: t.x, y: t.y });
     if (t.history.length > TRAIL_LEN) t.history.shift();
-  }
 
-  // Vẽ từng sợi
-  for (let i = 0; i < TRAIL_COUNT; i++) {
-    const t = trails[i];
     if (t.history.length < 2) continue;
 
-    const ratio    = i / TRAIL_COUNT;
-    const alpha    = 0.55 - ratio * 0.3;
-    const width    = 1.8 - ratio * 1.2;
+    const ratio = i / TRAIL_COUNT;
+    const maxAlpha = 0.6 - ratio * 0.2;
+    const maxWidth = 1.6 - ratio * 0.8;
 
     ctx.beginPath();
-    ctx.moveTo(t.history[0].x, t.history[0].y);
-
     for (let j = 1; j < t.history.length; j++) {
-      const segAlpha = (j / t.history.length) * alpha;
-      ctx.strokeStyle = `rgba(255, 255, 255, ${segAlpha})`;
-      ctx.lineWidth   = width * (j / t.history.length);
+      const prog    = j / t.history.length;
+      const alpha   = prog * maxAlpha;
+      const width   = prog * maxWidth;
+
+      ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+      ctx.lineWidth   = Math.max(0.3, width);
       ctx.lineCap     = 'round';
       ctx.lineJoin    = 'round';
 
-      const xc = (t.history[j].x + t.history[j - 1].x) / 2;
-      const yc = (t.history[j].y + t.history[j - 1].y) / 2;
-      ctx.quadraticCurveTo(t.history[j - 1].x, t.history[j - 1].y, xc, yc);
+      ctx.beginPath();
+      ctx.moveTo(t.history[j - 1].x, t.history[j - 1].y);
+      ctx.lineTo(t.history[j].x,     t.history[j].y);
+      ctx.stroke();
     }
-    ctx.stroke();
   }
 
   requestAnimationFrame(animateTrail);
