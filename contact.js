@@ -1,25 +1,29 @@
 // ===== THÔNG TIN LIÊN HỆ =====
-// Chỉnh sửa link tại đây
+// Chỉnh sửa thông tin tại đây
 
 const contact = {
   facebook: {
     label: "Facebook",
-    url: "https://facebook.com/your_username",
+    value: "https://facebook.com/your_username",
+    type: "link",           // mở link
     icon: "fab fa-facebook-f"
   },
   discord: {
     label: "Discord",
-    url: "tynh_nekoz",   // hoặc link server
+    value: "your_username",  // username discord để copy
+    type: "copy",           // click = copy
     icon: "fab fa-discord"
   },
   email: {
     label: "Email",
-    url: "triclone1234@gmail.com",
+    value: "your@email.com", // email để copy
+    type: "copy",
     icon: "fas fa-envelope"
   },
   zalo: {
     label: "Zalo",
-    url: "0349804511",
+    value: "0123456789",     // số điện thoại zalo để copy
+    type: "copy",
     icon: "fas fa-comment-dots"
   }
 };

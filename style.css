@@ -178,6 +178,10 @@ body::after {
   transition: var(--transition);
   position: relative;
   overflow: hidden;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
 }
 
 .contact-btn::before {
@@ -190,7 +194,7 @@ body::after {
 }
 
 .contact-btn:hover::before {
-  opacity: 0.12;
+  opacity: 0.1;
 }
 
 .contact-btn:hover {
@@ -199,32 +203,66 @@ body::after {
   box-shadow: 0 4px 20px var(--accent-glow);
 }
 
-.contact-btn i {
+.contact-btn.copied {
+  border-color: #10b981;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+}
+
+.contact-btn.copied::before {
+  background: linear-gradient(135deg, #10b981, #059669);
+  opacity: 0.1;
+}
+
+.contact-btn > i:first-child {
   font-size: 1.15rem;
   width: 22px;
   text-align: center;
   color: var(--accent);
   position: relative;
   z-index: 1;
+  flex-shrink: 0;
 }
 
-.contact-btn span {
+.contact-btn.copied > i:first-child {
+  color: #10b981;
+}
+
+.btn-label {
   position: relative;
   z-index: 1;
+  flex-shrink: 0;
 }
 
-.contact-btn .arrow {
+.btn-value {
+  position: relative;
+  z-index: 1;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 400;
+  margin-left: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.action-icon {
   margin-left: auto;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
   transition: var(--transition);
   position: relative;
   z-index: 1;
+  flex-shrink: 0;
 }
 
-.contact-btn:hover .arrow {
+.contact-btn:hover .action-icon {
   color: var(--accent);
-  transform: translateX(3px);
+  transform: translateX(2px);
+}
+
+.contact-btn.copied .action-icon {
+  color: #10b981;
 }
 
 /* ===== SCROLLBAR ===== */
