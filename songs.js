@@ -3,8 +3,18 @@
 
 const songs = [
   {
-    title: "Không Bằng",
+    title: "Cự Tuyệt x Tìm Em",
+    artist: "ChillLome Remix",
+    src: "song/Cự Tuyệt x Tìm Em  ChillLome Remix.mp3"
+  },
+  {
+    title: "Không Buông",
     artist: "Hngle ft. Ari",
-    src: "song/Hngle - KHÔNG BẰNG ft. Ari  Official Music Video.mp3"
+    src: "song/Hngle - KHÔNG BUÔNG ft. Ari  Official Music Video.mp3"
+  },
+  {
+    title: "Simp Gái 808",
+    artist: "Low G",
+    src: "song/Simp Gái 808  Low G  Rap Nhà Làm.mp3"
   }
 ];
