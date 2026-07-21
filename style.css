@@ -50,6 +50,14 @@ body::after {
   z-index: 1;
 }
 
+/* ===== CURSOR TRAIL CANVAS ===== */
+#trailCanvas {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
 /* ===== CARD ===== */
 .card {
   position: relative;
@@ -389,10 +397,6 @@ body::after {
 
 /* ===== CHỐNG TÔ CHỮ ===== */
 * {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 

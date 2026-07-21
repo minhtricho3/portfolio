@@ -279,3 +279,87 @@ document.addEventListener('keydown', (e) => {
 
 // Chặn chuột phải
 document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+// ===== CURSOR TRAIL =====
+const canvas = document.getElementById('trailCanvas');
+const ctx    = canvas.getContext('2d');
+
+function resizeCanvas() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+const trails = [];
+const TRAIL_COUNT = 35;     // số sợi
+const TRAIL_LEN   = 22;     // độ dài lịch sử mỗi sợi
+const SPEED       = 0.12;   // tốc độ đuổi theo chuột (0~1)
+
+// Khởi tạo các sợi với offset lệch nhau
+for (let i = 0; i < TRAIL_COUNT; i++) {
+  trails.push({
+    x: window.innerWidth  / 2,
+    y: window.innerHeight / 2,
+    history: [],
+    delay: i * 1.8,        // sợi sau trễ hơn sợi trước
+    angle: (i / TRAIL_COUNT) * Math.PI * 2
+  });
+}
+
+let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+window.addEventListener('mousemove', (e) => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+});
+
+// Vị trí trung gian cho từng sợi (mỗi sợi đuổi theo sợi trước)
+const positions = Array.from({ length: TRAIL_COUNT }, () => ({
+  x: mouse.x, y: mouse.y
+}));
+
+function animateTrail() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Cập nhật vị trí từng sợi theo chain
+  for (let i = 0; i < TRAIL_COUNT; i++) {
+    const target = i === 0 ? mouse : positions[i - 1];
+    positions[i].x += (target.x - positions[i].x) * (SPEED - i * 0.001);
+    positions[i].y += (target.y - positions[i].y) * (SPEED - i * 0.001);
+
+    const t = trails[i];
+    t.history.push({ x: positions[i].x, y: positions[i].y });
+    if (t.history.length > TRAIL_LEN) t.history.shift();
+  }
+
+  // Vẽ từng sợi
+  for (let i = 0; i < TRAIL_COUNT; i++) {
+    const t = trails[i];
+    if (t.history.length < 2) continue;
+
+    const ratio    = i / TRAIL_COUNT;
+    const alpha    = 0.55 - ratio * 0.3;
+    const width    = 1.8 - ratio * 1.2;
+
+    ctx.beginPath();
+    ctx.moveTo(t.history[0].x, t.history[0].y);
+
+    for (let j = 1; j < t.history.length; j++) {
+      const segAlpha = (j / t.history.length) * alpha;
+      ctx.strokeStyle = `rgba(255, 255, 255, ${segAlpha})`;
+      ctx.lineWidth   = width * (j / t.history.length);
+      ctx.lineCap     = 'round';
+      ctx.lineJoin    = 'round';
+
+      const xc = (t.history[j].x + t.history[j - 1].x) / 2;
+      const yc = (t.history[j].y + t.history[j - 1].y) / 2;
+      ctx.quadraticCurveTo(t.history[j - 1].x, t.history[j - 1].y, xc, yc);
+    }
+    ctx.stroke();
+  }
+
+  requestAnimationFrame(animateTrail);
+}
+
+animateTrail();
