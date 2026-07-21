@@ -4,7 +4,7 @@
 const contact = {
   facebook: {
     label: "Facebook",
-    value: "https://facebook.com/your_username",
+    value: "https://www.facebook.com/baybi.le.thi.boo",
     type: "link",           // mở link
     icon: "fab fa-facebook-f"
   },
