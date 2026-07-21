@@ -148,6 +148,15 @@ body::after {
   padding: 0 4px;
 }
 
+.note {
+  color: rgba(148, 163, 184, 0.55);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  margin-top: 10px;
+  font-style: italic;
+  padding: 0 4px;
+}
+
 /* ===== DIVIDER ===== */
 .divider {
   height: 1px;
