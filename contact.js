@@ -10,19 +10,19 @@ const contact = {
   },
   discord: {
     label: "Discord",
-    value: "your_username",  // username discord để copy
+    value: "tynh_nekoz",  // username discord để copy
     type: "copy",           // click = copy
     icon: "fab fa-discord"
   },
   email: {
     label: "Email",
-    value: "your@email.com", // email để copy
+    value: "triclone1234@gmail.com", // email để copy
     type: "copy",
     icon: "fas fa-envelope"
   },
   zalo: {
     label: "Zalo",
-    value: "0123456789",     // số điện thoại zalo để copy
+    value: "0349804511",     // số điện thoại zalo để copy
     type: "copy",
     icon: "fas fa-comment-dots"
   }
