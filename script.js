@@ -263,3 +263,19 @@ audio.play().then(() => {
   document.removeEventListener('keydown',    tryAutoPlay);
   document.removeEventListener('touchstart', tryAutoPlay);
 }).catch(() => {});
+
+// ===== CHỐNG DEVTOOLS =====
+// Chặn F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+document.addEventListener('keydown', (e) => {
+  if (
+    e.key === 'F12' ||
+    (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)) ||
+    (e.ctrlKey && ['U','u'].includes(e.key))
+  ) {
+    e.preventDefault();
+    return false;
+  }
+});
+
+// Chặn chuột phải
+document.addEventListener('contextmenu', (e) => e.preventDefault());
