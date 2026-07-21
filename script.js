@@ -23,11 +23,9 @@ Object.values(contact).forEach(item => {
       navigator.clipboard.writeText(item.value).then(() => {
         const icon = el.querySelector('.action-icon');
         const label = el.querySelector('.btn-label');
-
         icon.className = 'fas fa-check action-icon';
         label.textContent = 'Đã copy!';
         el.classList.add('copied');
-
         setTimeout(() => {
           icon.className = 'fas fa-copy action-icon';
           label.textContent = item.label;
@@ -41,24 +39,29 @@ Object.values(contact).forEach(item => {
 });
 
 // ===== MUSIC PLAYER =====
-const audio       = document.getElementById('audio');
-const playBtn     = document.getElementById('playBtn');
-const prevBtn     = document.getElementById('prevBtn');
-const nextBtn     = document.getElementById('nextBtn');
-const shuffleBtn  = document.getElementById('shuffleBtn');
-const repeatBtn   = document.getElementById('repeatBtn');
-const progressBar = document.getElementById('progressBar');
-const volumeBar   = document.getElementById('volumeBar');
-const currentTimeEl = document.getElementById('currentTime');
-const totalTimeEl   = document.getElementById('totalTime');
-const titleEl     = document.getElementById('playerTitle');
-const artistEl    = document.getElementById('playerArtist');
+const audio          = document.getElementById('audio');
+const playBtn        = document.getElementById('playBtn');
+const prevBtn        = document.getElementById('prevBtn');
+const nextBtn        = document.getElementById('nextBtn');
+const shuffleBtn     = document.getElementById('shuffleBtn');
+const repeatBtn      = document.getElementById('repeatBtn');
+const progressBar    = document.getElementById('progressBar');
+const volumeBar      = document.getElementById('volumeBar');
+const currentTimeEl  = document.getElementById('currentTime');
+const totalTimeEl    = document.getElementById('totalTime');
+const titleEl        = document.getElementById('playerTitle');
+const artistEl       = document.getElementById('playerArtist');
+const nowPlayingLabel= document.getElementById('nowPlayingLabel');
+const playerToggle   = document.getElementById('playerToggle');
+const player         = document.getElementById('player');
 
 let currentIndex = 0;
-let isPlaying = false;
-let isShuffle = false;
-let isRepeat = false;
+let isPlaying    = false;
+let isShuffle    = false;
+let isRepeat     = false;
+let autoStarted  = false; // đã autoplay chưa
 
+// ----- Helpers -----
 function formatTime(sec) {
   if (isNaN(sec)) return '0:00';
   const m = Math.floor(sec / 60);
@@ -66,20 +69,32 @@ function formatTime(sec) {
   return `${m}:${s}`;
 }
 
+function updateProgressStyle(pct) {
+  progressBar.style.background =
+    `linear-gradient(to right, var(--accent) ${pct}%, rgba(255,255,255,0.1) ${pct}%)`;
+}
+
+function updateVolumeStyle(val) {
+  volumeBar.style.background =
+    `linear-gradient(to right, var(--accent) ${val}%, rgba(255,255,255,0.1) ${val}%)`;
+}
+
+// ----- Load / Play / Pause -----
 function loadSong(index) {
   const song = songs[index];
   if (!song) return;
   audio.src = song.src;
-  titleEl.textContent = song.title;
-  artistEl.textContent = song.artist;
+  titleEl.textContent        = song.title;
+  artistEl.textContent       = song.artist;
+  nowPlayingLabel.textContent = song.title;
   progressBar.value = 0;
   currentTimeEl.textContent = '0:00';
-  totalTimeEl.textContent = '0:00';
+  totalTimeEl.textContent   = '0:00';
   updateProgressStyle(0);
 }
 
 function playSong() {
-  audio.play();
+  audio.play().catch(() => {});
   isPlaying = true;
   playBtn.innerHTML = '<i class="fas fa-pause"></i>';
 }
@@ -91,15 +106,11 @@ function pauseSong() {
 }
 
 function togglePlay() {
-  if (!audio.src) { loadSong(0); playSong(); return; }
   isPlaying ? pauseSong() : playSong();
 }
 
 function prevSong() {
-  if (audio.currentTime > 3) {
-    audio.currentTime = 0;
-    return;
-  }
+  if (audio.currentTime > 3) { audio.currentTime = 0; return; }
   currentIndex = (currentIndex - 1 + songs.length) % songs.length;
   loadSong(currentIndex);
   playSong();
@@ -107,9 +118,10 @@ function prevSong() {
 
 function nextSong() {
   if (isShuffle) {
-    let rand;
-    do { rand = Math.floor(Math.random() * songs.length); } while (rand === currentIndex && songs.length > 1);
-    currentIndex = rand;
+    let r;
+    do { r = Math.floor(Math.random() * songs.length); }
+    while (r === currentIndex && songs.length > 1);
+    currentIndex = r;
   } else {
     currentIndex = (currentIndex + 1) % songs.length;
   }
@@ -117,15 +129,7 @@ function nextSong() {
   playSong();
 }
 
-function updateProgressStyle(percent) {
-  progressBar.style.background = `linear-gradient(to right, var(--accent) ${percent}%, rgba(255,255,255,0.1) ${percent}%)`;
-}
-
-function updateVolumeStyle(val) {
-  volumeBar.style.background = `linear-gradient(to right, var(--accent) ${val}%, rgba(255,255,255,0.1) ${val}%)`;
-}
-
-// Events
+// ----- Events -----
 playBtn.addEventListener('click', togglePlay);
 prevBtn.addEventListener('click', prevSong);
 nextBtn.addEventListener('click', nextSong);
@@ -142,12 +146,12 @@ repeatBtn.addEventListener('click', () => {
 
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
-  const percent = (audio.currentTime / audio.duration) * 100;
-  progressBar.value = percent;
-  progressBar.max = 100;
+  const pct = (audio.currentTime / audio.duration) * 100;
+  progressBar.value = pct;
+  progressBar.max   = 100;
   currentTimeEl.textContent = formatTime(audio.currentTime);
-  totalTimeEl.textContent = formatTime(audio.duration);
-  updateProgressStyle(percent);
+  totalTimeEl.textContent   = formatTime(audio.duration);
+  updateProgressStyle(pct);
 });
 
 progressBar.addEventListener('input', () => {
@@ -162,15 +166,41 @@ volumeBar.addEventListener('input', () => {
 });
 
 audio.addEventListener('ended', () => {
-  if (isRepeat) {
-    audio.currentTime = 0;
-    playSong();
-  } else {
-    nextSong();
-  }
+  isRepeat ? (audio.currentTime = 0, playSong()) : nextSong();
 });
 
-// Init
+// ----- Toggle ẩn/hiện -----
+playerToggle.addEventListener('click', () => {
+  player.classList.toggle('collapsed');
+});
+
+// ----- Autoplay khi user tương tác lần đầu -----
+function tryAutoPlay() {
+  if (autoStarted) return;
+  autoStarted = true;
+  playSong();
+  document.removeEventListener('click',     tryAutoPlay);
+  document.removeEventListener('keydown',   tryAutoPlay);
+  document.removeEventListener('touchstart',tryAutoPlay);
+}
+
+document.addEventListener('click',      tryAutoPlay);
+document.addEventListener('keydown',    tryAutoPlay);
+document.addEventListener('touchstart', tryAutoPlay);
+
+// ----- Init -----
 audio.volume = volumeBar.value / 100;
 updateVolumeStyle(volumeBar.value);
 loadSong(0);
+
+// Thử autoplay thẳng (sẽ thành công nếu browser cho phép)
+audio.play().then(() => {
+  isPlaying    = true;
+  autoStarted  = true;
+  playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+  document.removeEventListener('click',      tryAutoPlay);
+  document.removeEventListener('keydown',    tryAutoPlay);
+  document.removeEventListener('touchstart', tryAutoPlay);
+}).catch(() => {
+  // Browser chặn autoplay → chờ user tương tác
+});
