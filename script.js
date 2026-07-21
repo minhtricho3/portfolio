@@ -305,7 +305,7 @@ const trails = Array.from({ length: TRAIL_COUNT }, (_, i) => ({
   x:       window.innerWidth  / 2,
   y:       window.innerHeight / 2,
   history: [],
-  speed:   0.15 + Math.random() * 0.35,         // tốc độ khác nhau
+  speed:   0.15 + Math.random() * 0.16,         // tốc độ khác nhau
   ox:      (Math.random() - 0.5) * 28,           // lệch ngang ngẫu nhiên
   oy:      (Math.random() - 0.5) * 28,           // lệch dọc ngẫu nhiên
   wobble:  (Math.random() - 0.5) * 0.08,        // rung nhẹ
