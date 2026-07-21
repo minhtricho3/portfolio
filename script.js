@@ -1,3 +1,63 @@
+// ===== LIKE BUTTON =====
+const likeBtn   = document.getElementById('likeBtn');
+const likeCount = document.getElementById('likeCount');
+
+const LIKED_KEY = 'tynh_liked'; // lưu trạng thái đã like chưa (per user)
+const BASE_URL  = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+const HEADERS   = {
+  'Content-Type': 'application/json',
+  'X-Master-Key': JSONBIN_API_KEY
+};
+
+let liked = localStorage.getItem(LIKED_KEY) === 'true';
+let count = 0;
+
+// Lấy số tim từ JSONBin
+async function fetchLikes() {
+  try {
+    const res  = await fetch(`${BASE_URL}/latest`, { headers: HEADERS });
+    const data = await res.json();
+    count = data.record.likes || 0;
+    renderLike();
+  } catch (e) {
+    likeCount.textContent = '—';
+  }
+}
+
+// Ghi số tim lên JSONBin
+async function saveLikes(newCount) {
+  try {
+    await fetch(BASE_URL, {
+      method: 'PUT',
+      headers: HEADERS,
+      body: JSON.stringify({ likes: newCount })
+    });
+  } catch (e) {
+    console.error('Lưu tim thất bại:', e);
+  }
+}
+
+function renderLike() {
+  likeCount.textContent = count;
+  likeBtn.classList.toggle('liked', liked);
+}
+
+likeBtn.addEventListener('click', async () => {
+  liked  = !liked;
+  count  = liked ? count + 1 : Math.max(0, count - 1);
+  localStorage.setItem(LIKED_KEY, liked);
+
+  // pop animation
+  likeBtn.classList.remove('pop');
+  void likeBtn.offsetWidth;
+  if (liked) likeBtn.classList.add('pop');
+
+  renderLike();
+  await saveLikes(count);
+});
+
+fetchLikes();
+
 // ===== CONTACT BUTTONS =====
 const container = document.getElementById('contactLinks');
 
